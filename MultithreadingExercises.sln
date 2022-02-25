@@ -19,11 +19,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "08.Semaphores", "08.Semapho
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "09.Events", "09.Events\09.Events.csproj", "{956AD7EB-EFAD-4436-8798-ABE2ABEBBF6B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "10.BackgroundWorker", "10.BackgroundWorker\10.BackgroundWorker.csproj", "{030F1FF8-8FE7-47F2-BC55-B2889CEF3FF2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "10.BackgroundWorker", "10.BackgroundWorker\10.BackgroundWorker.csproj", "{030F1FF8-8FE7-47F2-BC55-B2889CEF3FF2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "11.Cancellation", "11.Cancellation\11.Cancellation.csproj", "{410B307D-2D54-4FD5-9F95-393E8C54A818}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "11.Cancellation", "11.Cancellation\11.Cancellation.csproj", "{410B307D-2D54-4FD5-9F95-393E8C54A818}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "12.ConsumerProducer", "12.ConsumerProducer\12.ConsumerProducer.csproj", "{09C00061-E0DF-4B02-88D7-3B1776794D53}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "12.ConsumerProducer", "12.ConsumerProducer\12.ConsumerProducer.csproj", "{09C00061-E0DF-4B02-88D7-3B1776794D53}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "14.Barrier", "14.Barrier\14.Barrier.csproj", "{999966A6-7E0B-40A1-BB57-C19AFB1AFF69}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "15.ReaderWriterLock", "15.ReaderWriterLock\15.ReaderWriterLock.csproj", "{CF185E4B-813F-41B7-85C6-2F6BBAC0FA49}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,6 +79,14 @@ Global
 		{09C00061-E0DF-4B02-88D7-3B1776794D53}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{09C00061-E0DF-4B02-88D7-3B1776794D53}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{09C00061-E0DF-4B02-88D7-3B1776794D53}.Release|Any CPU.Build.0 = Release|Any CPU
+		{999966A6-7E0B-40A1-BB57-C19AFB1AFF69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{999966A6-7E0B-40A1-BB57-C19AFB1AFF69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{999966A6-7E0B-40A1-BB57-C19AFB1AFF69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{999966A6-7E0B-40A1-BB57-C19AFB1AFF69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF185E4B-813F-41B7-85C6-2F6BBAC0FA49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF185E4B-813F-41B7-85C6-2F6BBAC0FA49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF185E4B-813F-41B7-85C6-2F6BBAC0FA49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF185E4B-813F-41B7-85C6-2F6BBAC0FA49}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
