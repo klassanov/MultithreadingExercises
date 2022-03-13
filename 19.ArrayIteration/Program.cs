@@ -18,13 +18,20 @@ namespace ArrayIterationDemo
             Results.Add("1. Regular Array Iteration", stopwatch.Elapsed);
 
             stopwatch = Stopwatch.StartNew();
-            long threadPoolSum = ThreadPoolLocalTotalsIteration();
+            long threadPoolTotalsSum = ThreadPoolIteration();
+            Results.Add("2. Thread Pool Iteration", stopwatch.Elapsed);
+
+            stopwatch = Stopwatch.StartNew();
+            long threadPoolLocalTotalsSum = ThreadPoolLocalTotalsIteration();
             Results.Add("3. Thread Pool Local Totals Iteration", stopwatch.Elapsed);
 
 
 
             PrintResults();
-            Debug.Assert(regularSum == threadPoolSum, "Sums do not match");
+
+            Debug.Assert(regularSum == threadPoolTotalsSum &&
+                         threadPoolTotalsSum == threadPoolLocalTotalsSum,
+                        "Sums do not match");
         }
 
         static long RegularArrayIteration()
@@ -38,6 +45,51 @@ namespace ArrayIterationDemo
 
             return total;
         }
+
+        /// <summary>
+        /// Thread pool and lock on each addition operation
+        /// </summary>
+        /// <returns></returns>
+        static long ThreadPoolIteration()
+        {
+            var locker = new object();
+            long total = 0;
+            int threadNum = Environment.ProcessorCount;
+            int chunkSize = Items.Length / threadNum;
+            CountdownEvent countdownHandle = new CountdownEvent(threadNum);
+
+            for (int i = 1; i <= threadNum; i++)
+            {
+                int startIndex = (i - 1) * chunkSize;
+                int endIndex = Math.Min(startIndex + chunkSize - 1, Items.Length);
+
+                if (i == threadNum && endIndex < Items.Length - 1)
+                {
+                    endIndex = Items.Length - 1;
+                }
+
+                var currentStartIndex = startIndex;
+                var currentEndIndex = endIndex;
+
+                ThreadPool.QueueUserWorkItem(_ =>
+                {
+                    for (int j = currentStartIndex; j <= currentEndIndex; j++)
+                    {
+                        lock (locker)
+                        {
+                            total += Items[j];
+                        }
+                    }
+
+                    countdownHandle.Signal();
+                });
+            }
+
+            countdownHandle.Wait();
+            return total;
+        }
+
+
 
         /// <summary>
         /// ThreadPool, local totals and 1 lock per thread when adding to the global totals
@@ -64,7 +116,8 @@ namespace ArrayIterationDemo
                 var currentStartIndex = startIndex;
                 var currentEndIndex = endIndex;
 
-                ThreadPool.QueueUserWorkItem(_ => {
+                ThreadPool.QueueUserWorkItem(_ =>
+                {
 
                     long localTotal = 0;
 
