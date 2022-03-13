@@ -26,9 +26,7 @@ namespace _03.SharedData
 
         static void CapturedVariables()
         {
-            for (int i = 0;
-                i < 10;
-                i++)
+            for (int i = 0; i < 10; i++)
             {
                 //We take a picture of i at the moment of the thread creation and then print it, it work OK
                 //var current = i;
