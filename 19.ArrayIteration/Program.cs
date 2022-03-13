@@ -25,12 +25,20 @@ namespace ArrayIterationDemo
             long threadPoolLocalTotalsSum = ThreadPoolLocalTotalsIteration();
             Results.Add("3. Thread Pool Local Totals Iteration", stopwatch.Elapsed);
 
+            stopwatch = Stopwatch.StartNew();
+            long threadPoolWithInterlockedTotalsSum = ThreadPoolWithInterlockedIteration();
+            Results.Add("4. Thread Pool Interlocked Iteration", stopwatch.Elapsed);
 
+            stopwatch = Stopwatch.StartNew();
+            long threadPoolLocalTotalsInterlockedSum = ThreadPoolLocalTotalsInterlockedIteration();
+            Results.Add("5. Thread Pool Local Totals Interlocked Iteration", stopwatch.Elapsed);
 
             PrintResults();
 
             Debug.Assert(regularSum == threadPoolTotalsSum &&
-                         threadPoolTotalsSum == threadPoolLocalTotalsSum,
+                         threadPoolTotalsSum == threadPoolLocalTotalsSum &&
+                         threadPoolLocalTotalsSum == threadPoolWithInterlockedTotalsSum &&
+                         threadPoolWithInterlockedTotalsSum == threadPoolLocalTotalsInterlockedSum,
                         "Sums do not match");
         }
 
@@ -90,7 +98,6 @@ namespace ArrayIterationDemo
         }
 
 
-
         /// <summary>
         /// ThreadPool, local totals and 1 lock per thread when adding to the global totals
         /// </summary>
@@ -130,6 +137,91 @@ namespace ArrayIterationDemo
                     {
                         total += localTotal;
                     }
+
+                    countdownHandle.Signal();
+                });
+            }
+
+            countdownHandle.Wait();
+            return total;
+        }
+
+        /// <summary>
+        /// ThreadPool, lock with Interlocked on each addition
+        /// </summary>
+        /// <returns></returns>
+        static long ThreadPoolWithInterlockedIteration()
+        {
+            var locker = new object();
+            long total = 0;
+            int threadNum = Environment.ProcessorCount;
+            int chunkSize = Items.Length / threadNum;
+            CountdownEvent countdownHandle = new CountdownEvent(threadNum);
+
+            for (int i = 1; i <= threadNum; i++)
+            {
+                int startIndex = (i - 1) * chunkSize;
+                int endIndex = Math.Min(startIndex + chunkSize - 1, Items.Length);
+
+                if (i == threadNum && endIndex < Items.Length - 1)
+                {
+                    endIndex = Items.Length - 1;
+                }
+
+                var currentStartIndex = startIndex;
+                var currentEndIndex = endIndex;
+
+                ThreadPool.QueueUserWorkItem(_ =>
+                {
+                    for (int j = currentStartIndex; j <= currentEndIndex; j++)
+                    {
+                        Interlocked.Add(ref total, Items[j]);                        
+                    }
+
+                    countdownHandle.Signal();
+                });
+            }
+
+            countdownHandle.Wait();
+            return total;
+        }
+
+        /// <summary>
+        /// ThreadPool, 1 lock per thread with Interlocked
+        /// </summary>
+        /// <returns></returns>
+        static long ThreadPoolLocalTotalsInterlockedIteration()
+        {
+            var locker = new object();
+            long total = 0;
+            int threadNum = Environment.ProcessorCount;
+            int chunkSize = Items.Length / threadNum;
+            CountdownEvent countdownHandle = new CountdownEvent(threadNum);
+
+            for (int i = 1; i <= threadNum; i++)
+            {
+                int startIndex = (i - 1) * chunkSize;
+                int endIndex = Math.Min(startIndex + chunkSize - 1, Items.Length);
+
+                if (i == threadNum && endIndex < Items.Length - 1)
+                {
+                    endIndex = Items.Length - 1;
+                }
+
+                var currentStartIndex = startIndex;
+                var currentEndIndex = endIndex;
+
+                ThreadPool.QueueUserWorkItem(_ =>
+                {
+
+                    long localTotal = 0;
+
+                    for (int j = currentStartIndex; j <= currentEndIndex; j++)
+                    {
+                        localTotal += Items[j];
+                    }
+                    
+                    Interlocked.Add(ref total, localTotal);
 
                     countdownHandle.Signal();
                 });
