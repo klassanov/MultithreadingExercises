@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace ArrayIterationDemo
 {
@@ -33,12 +34,22 @@ namespace ArrayIterationDemo
             long threadPoolLocalTotalsInterlockedSum = ThreadPoolLocalTotalsInterlockedIteration();
             Results.Add("5. Thread Pool Local Totals Interlocked Iteration", stopwatch.Elapsed);
 
+            stopwatch = Stopwatch.StartNew();
+            long parallelForSum = ParallelForIteration();
+            Results.Add("6. Parallel For Iteration", stopwatch.Elapsed);
+
+            stopwatch = Stopwatch.StartNew();
+            long parallelForLocalTotalSum = ParallelForLocalTotalIteration();
+            Results.Add("7. Parallel For LocalTotal", stopwatch.Elapsed);
+
             PrintResults();
 
             Debug.Assert(regularSum == threadPoolTotalsSum &&
                          threadPoolTotalsSum == threadPoolLocalTotalsSum &&
                          threadPoolLocalTotalsSum == threadPoolWithInterlockedTotalsSum &&
-                         threadPoolWithInterlockedTotalsSum == threadPoolLocalTotalsInterlockedSum,
+                         threadPoolWithInterlockedTotalsSum == threadPoolLocalTotalsInterlockedSum &&
+                         threadPoolLocalTotalsInterlockedSum == parallelForSum &&
+                         parallelForSum == parallelForLocalTotalSum,
                         "Sums do not match");
         }
 
@@ -175,7 +186,7 @@ namespace ArrayIterationDemo
                 {
                     for (int j = currentStartIndex; j <= currentEndIndex; j++)
                     {
-                        Interlocked.Add(ref total, Items[j]);                        
+                        Interlocked.Add(ref total, Items[j]);
                     }
 
                     countdownHandle.Signal();
@@ -220,7 +231,7 @@ namespace ArrayIterationDemo
                     {
                         localTotal += Items[j];
                     }
-                    
+
                     Interlocked.Add(ref total, localTotal);
 
                     countdownHandle.Signal();
@@ -228,6 +239,65 @@ namespace ArrayIterationDemo
             }
 
             countdownHandle.Wait();
+            return total;
+        }
+
+
+        /// <summary>
+        /// Parallel for with Interlocked, 1 lock per each addition
+        /// </summary>
+        /// <returns></returns>
+        static long ParallelForIteration()
+        {
+            long total = 0;
+            int threadNum = Environment.ProcessorCount;
+            int chunkSize = Items.Length / threadNum;
+
+            Parallel.For(0, threadNum, i =>
+            {
+                for (int j = i * chunkSize; j < (i + 1) * chunkSize; j++)
+                {
+                    Interlocked.Add(ref total, Items[j]);
+                }
+
+            });
+            return total;
+        }
+
+        /// <summary>
+        /// Parallel for with localtotal, 1 lock per each thread when adding to the total
+        /// </summary>
+        /// <returns></returns>
+        static long ParallelForLocalTotalIteration()
+        {
+            long total = 0;
+            int threadNum = Environment.ProcessorCount;
+            int chunkSize = Items.Length / threadNum;
+            var locker = new object();
+
+            Parallel.For<long>(0, threadNum,
+
+                localInit: () => 0,
+
+                body: (i, state, localTotal) =>
+                {
+                    for (int j = i * chunkSize; j < (i + 1) * chunkSize; j++)
+                    {
+                        localTotal += Items[j];
+                    }
+
+                    return localTotal;
+                },
+
+                localFinally: (localTotal) =>
+                {
+                    lock (locker)
+                    {
+                        total += localTotal;
+                    }
+                }
+            );
+
             return total;
         }
 
