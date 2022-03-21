@@ -19,7 +19,7 @@ namespace _09.Events
             }
             Thread.Sleep(3000);
             Console.WriteLine("Opening the gate");
-            WaitHandle.Set();//Unblocks many thread and it is called once per all threads
+            WaitHandle.Reset();//Unblocks many thread and it is called once per all threads
         }
 
         private static void Work(object id)

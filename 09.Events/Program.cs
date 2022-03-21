@@ -7,8 +7,8 @@ namespace _09.Events
         static void Main(string[] args)
         {
             //Auto.Demo();
-            //Manual.Demo();
-            Countdown.Demo();
+            Manual.Demo();
+            //Countdown.Demo();
         }
     }
 }
